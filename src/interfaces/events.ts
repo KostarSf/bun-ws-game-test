@@ -1,3 +1,4 @@
+import type { SerializedEntity } from "../server/ServerEntity";
 import type { Entity } from "./entities";
 
 export interface CreateEvent {
@@ -10,4 +11,18 @@ export interface UpdateEvent {
 	data: Entity[];
 }
 
-export type GameEvent = CreateEvent | UpdateEvent;
+export interface DeleteEvent {
+	type: "delete";
+	data: Entity[];
+}
+
+export interface ServerTickEvent {
+	type: "tick";
+	data: {
+		created: SerializedEntity[];
+		updated: SerializedEntity[];
+		removed: string[];
+	};
+}
+
+export type GameEvent = CreateEvent | UpdateEvent | DeleteEvent | ServerTickEvent;

@@ -1,13 +1,7 @@
 import gamepage from "./index.html";
-import type { Entity } from "./interfaces/entities";
-import type { CreateEvent, UpdateEvent } from "./interfaces/events";
-import { circlesCollide, gravitationalForce, resolveCollision, updateObject } from "./utils";
+import ServerEngine from "./server/ServerEngine";
 
-const entities: Entity[] = [
-	{ id: "1", x: 200, y: 200, radius: 20, mass: 4000, velX: 0, velY: 0, forceX: 0, forceY: 0 },
-	{ id: "2", x: 450, y: 300, radius: 10, mass: 10, velX: 0, velY: 0, forceX: 0, forceY: 0 },
-	{ id: "3", x: 350, y: 350, radius: 10, mass: 200, velX: 0, velY: 0, forceX: 0, forceY: 0 },
-];
+const serverEngine = new ServerEngine();
 
 const server = Bun.serve({
 	routes: {
@@ -20,51 +14,7 @@ const server = Bun.serve({
 			return new Response(null, { status: 101 });
 		},
 	},
-	websocket: {
-		open(ws) {
-			ws.subscribe("update");
-			ws.send(JSON.stringify({ type: "create", data: entities } satisfies CreateEvent));
-		},
-		message(ws, message) {
-			console.log(message);
-		},
-		close(ws, code, reason) {
-			ws.unsubscribe("update");
-		},
-	},
+	websocket: serverEngine.createWebsocketHandler(),
 });
 
-setInterval(() => {
-	const deltaTime = 1 / 60;
-
-	for (const body of entities) {
-		for (const otherBody of entities) {
-			if (otherBody === body) {
-				continue;
-			}
-
-			const force = gravitationalForce(body, otherBody);
-
-			body.forceX += force.x;
-			body.forceY += force.y;
-		}
-	}
-
-	for (const body of entities) {
-		updateObject(body, deltaTime);
-	}
-
-	for (const body of entities) {
-		for (const otherBody of entities) {
-			if (otherBody === body) {
-				continue;
-			}
-
-			if (circlesCollide(body, otherBody)) {
-				resolveCollision(body, otherBody);
-			}
-		}
-	}
-
-	server.publish("update", JSON.stringify({ type: "update", data: entities } satisfies UpdateEvent));
-}, 16);
+serverEngine.start(server);
