@@ -1,0 +1,19 @@
+{
+	"name": "bun-ws-game-test",
+	"module": "src/server.ts",
+	"type": "module",
+	"private": true,
+	"scripts": {
+		"dev": "bun --watch ./src/server.ts"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "^1.9.4",
+		"@types/bun": "latest"
+	},
+	"peerDependencies": {
+		"typescript": "^5"
+	},
+	"dependencies": {
+		"excalibur": "^0.30.3"
+	}
+}
