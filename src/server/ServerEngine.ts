@@ -9,6 +9,9 @@ export default class ServerEngine {
 	}
 
 	stopLoop = true;
+	loopDuration = 0;
+
+	timeFactor = 1;
 	pause = true;
 
 	server?: Bun.Server;
@@ -42,6 +45,7 @@ export default class ServerEngine {
 
 		this.scene.start(this);
 		this.stopLoop = false;
+		this.loopDuration = 0;
 
 		void this.gameLoop();
 	}
@@ -56,7 +60,7 @@ export default class ServerEngine {
 			await Bun.sleep(new Date(start + msTime));
 			const end = Date.now();
 
-			console.log(end - start);
+			this.loopDuration = Math.max(end - start, msTime);
 		}
 	}
 
@@ -74,9 +78,11 @@ export default class ServerEngine {
 	}
 
 	private tick() {
+		const deltaTime = (this.loopDuration / 1000) * 60 * this.timeFactor;
+
 		if (!this.pause) {
-			this.scene.tick(this);
-			this.scene.tickEnd(this);
+			this.scene.tick(this, deltaTime);
+			this.scene.tickEnd(this, deltaTime);
 		}
 
 		const updatedEntities = this.scene.entities

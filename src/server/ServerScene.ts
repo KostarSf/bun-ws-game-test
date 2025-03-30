@@ -20,8 +20,10 @@ export default class ServerScene implements ITickable {
 	}
 
 	start(engine: ServerEngine): void {
-		for (let y = 0; y <= 1000; y += 50) {
-			for (let x = 0; x <= 2000; x += 50) {
+		const step = 300;
+
+		for (let y = 0; y <= 1000; y += step) {
+			for (let x = 0; x <= 2000; x += step) {
 				engine.scene.addEntity(new PhysBody({ mass: 10, pos: new Vector(x, y) }));
 			}
 		}
@@ -37,19 +39,19 @@ export default class ServerScene implements ITickable {
 		}
 	}
 
-	tick(engine: ServerEngine): void {
+	tick(engine: ServerEngine, deltaTime: number): void {
 		for (const entity of this.entities) {
-			entity.tick(engine);
+			entity.tick(engine, deltaTime);
 		}
 	}
 
-	tickEnd(engine: ServerEngine): void {
+	tickEnd(engine: ServerEngine, deltaTime: number): void {
 		while (this.removedEntities.length > 0) {
 			this._removedEntities.pop();
 		}
 
 		for (const entity of this.entities) {
-			entity.tickEnd(engine);
+			entity.tickEnd(engine, deltaTime);
 
 			if (entity.removed) {
 				this.removedEntities.push(entity);

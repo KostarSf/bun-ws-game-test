@@ -17,4 +17,6 @@ const server = Bun.serve({
 	websocket: serverEngine.createWebsocketHandler(),
 });
 
+console.log("Server started at http://localhost:3000");
+
 serverEngine.start(server);

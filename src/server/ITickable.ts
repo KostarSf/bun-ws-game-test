@@ -1,6 +1,6 @@
 import type ServerEngine from "./ServerEngine";
 
 export interface ITickable {
-	tick(engine: ServerEngine): void;
-	tickEnd(engine: ServerEngine): void;
+	tick(engine: ServerEngine, deltaTime: number): void;
+	tickEnd(engine: ServerEngine, deltaTime: number): void;
 }

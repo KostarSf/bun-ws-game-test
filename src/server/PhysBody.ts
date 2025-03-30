@@ -39,8 +39,8 @@ export default class PhysBody extends ServerEntity {
 		}
 	}
 
-	tickEnd(engine: ServerEngine): void {
-		this.pos.add(this.vel);
+	tickEnd(engine: ServerEngine, deltaTime: number): void {
+		this.pos.add(Vector.from(this.vel).mult(deltaTime));
 	}
 
 	serialize(): PhysBodySerialized {
@@ -49,6 +49,7 @@ export default class PhysBody extends ServerEntity {
 			type: this.type,
 			posX: this.pos.x,
 			posY: this.pos.y,
+			radius: Math.round(Math.max(10, this.mass * 0.05) * 100) / 100,
 		};
 	}
 
@@ -60,4 +61,5 @@ export default class PhysBody extends ServerEntity {
 export interface PhysBodySerialized extends SerializedEntity {
 	posX: number;
 	posY: number;
+	radius: number;
 }

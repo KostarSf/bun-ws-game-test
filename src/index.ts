@@ -1,13 +1,13 @@
-import { Actor, Color, DisplayMode, Engine, Scene, type SceneActivationContext } from "excalibur";
-import type { GameEvent } from "./interfaces/events";
+import { Actor, Circle, Color, DisplayMode, Engine, Scene, type SceneActivationContext } from "excalibur";
 import { PHYS_BODY_TYPE } from "./constants";
+import type { GameEvent } from "./interfaces/events";
 import type { PhysBodySerialized } from "./server/PhysBody";
 
 class MainScene extends Scene {
 	entitiesMap = new Map<string, Actor>();
 
 	onActivate(context: SceneActivationContext<unknown>): void {
-		this.camera.zoom = 0.3;
+		this.camera.zoom = 0.5;
 		const socket = new WebSocket("ws://localhost:3000/ws");
 
 		socket.addEventListener("open", () => {
@@ -46,10 +46,16 @@ class MainScene extends Scene {
 					const existingEntity = this.entitiesMap.get(physBody.id);
 					if (existingEntity) {
 						existingEntity.pos.setTo(physBody.posX, physBody.posY);
+						existingEntity.scale.setTo(physBody.radius / 10, physBody.radius / 10);
 						continue;
 					}
 
-					const actor = new Actor({ radius: 10, color: Color.White, x: physBody.posX, y: physBody.posY });
+					const actor = new Actor({
+						radius: physBody.radius,
+						color: Color.White,
+						x: physBody.posX,
+						y: physBody.posY,
+					});
 					this.entitiesMap.set(physBody.id, actor);
 					this.add(actor);
 				}

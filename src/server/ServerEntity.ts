@@ -8,9 +8,9 @@ export default class ServerEntity implements ITickable {
 
 	removed = false;
 
-	tick(engine: ServerEngine): void {}
+	tick(engine: ServerEngine, deltaTime: number): void {}
 
-	tickEnd(engine: ServerEngine): void {}
+	tickEnd(engine: ServerEngine, deltaTime: number): void {}
 
 	serialize(): SerializedEntity {
 		return { id: this.id, type: this.type };
