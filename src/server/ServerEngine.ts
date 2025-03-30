@@ -1,8 +1,15 @@
-import type { WebSocketHandler } from "bun";
-import type { ServerTickEvent } from "../interfaces/events";
 import ServerScene from "./ServerScene";
+import PauseEvent from "./events/PauseEvent";
+import ServerTickEvent from "./events/ServerTickEvent";
+import StopEvent from "./events/StopEvent";
+import NetworkClient from "./network/NetworkClient";
 
 export default class ServerEngine {
+	private _network: NetworkClient = new NetworkClient();
+	get network() {
+		return this._network;
+	}
+
 	private _scene = new ServerScene();
 	get scene() {
 		return this._scene;
@@ -14,31 +21,13 @@ export default class ServerEngine {
 	timeFactor = 1;
 	pause = true;
 
-	server?: Bun.Server;
-
-	createWebsocketHandler(): WebSocketHandler {
-		const engine = this;
-
-		return {
-			open(ws) {
-				ws.subscribe("tick");
-				engine.start(engine.server!);
-			},
-			message(ws, message) {
-				if (message === "resume") {
-					engine.pause = false;
-				}
-			},
-			close(ws, code, reason) {
-				ws.unsubscribe("tick");
-				engine.stop();
-			},
-		};
+	constructor() {
+		this.network.register(PauseEvent, (event) => {
+			this.pause = event.value;
+		});
 	}
 
-	start(server: Bun.Server) {
-		this.server = server;
-
+	start() {
 		if (!this.stopLoop) {
 			return;
 		}
@@ -74,7 +63,7 @@ export default class ServerEngine {
 
 		this.scene.stop(this);
 
-		this.server?.publish("tick", "stop");
+		this.network.broadcast(new StopEvent());
 	}
 
 	private tick() {
@@ -90,15 +79,6 @@ export default class ServerEngine {
 			.map((entity) => entity.serialize());
 		const removedEntities = this.scene.removedEntities.map((entity) => entity.id);
 
-		const event: ServerTickEvent = {
-			type: "tick",
-			data: {
-				created: [],
-				updated: updatedEntities,
-				removed: removedEntities,
-			},
-		};
-
-		this.server?.publish("tick", JSON.stringify(event));
+		this.network.broadcast(new ServerTickEvent([], updatedEntities, removedEntities));
 	}
 }

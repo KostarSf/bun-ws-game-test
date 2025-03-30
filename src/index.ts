@@ -2,6 +2,8 @@ import { Actor, Circle, Color, DisplayMode, Engine, Scene, type SceneActivationC
 import { PHYS_BODY_TYPE } from "./constants";
 import type { GameEvent } from "./interfaces/events";
 import type { PhysBodySerialized } from "./server/PhysBody";
+import PauseEvent from "./server/events/PauseEvent";
+import type ServerTickEvent from "./server/events/ServerTickEvent";
 
 class MainScene extends Scene {
 	entitiesMap = new Map<string, Actor>();
@@ -11,11 +13,13 @@ class MainScene extends Scene {
 		const socket = new WebSocket("ws://localhost:3000/ws");
 
 		socket.addEventListener("open", () => {
-			socket.send("resume");
+			socket.send(JSON.stringify(new PauseEvent(false)));
 		});
 
 		socket.addEventListener("message", (event: MessageEvent<string>) => {
-			if (event.data === "stop") {
+			const payload = JSON.parse(event.data) as GameEvent;
+
+			if (payload.type === "stop") {
 				for (const entity of this.entitiesMap.values()) {
 					entity.kill();
 				}
@@ -24,10 +28,10 @@ class MainScene extends Scene {
 				return;
 			}
 
-			const payload = JSON.parse(event.data) as GameEvent;
-
 			if (payload.type === "tick") {
-				for (const entityId of payload.data.removed) {
+				const tickEvent = payload as ServerTickEvent;
+
+				for (const entityId of tickEvent.removed) {
 					const entity = this.entitiesMap.get(entityId);
 
 					if (entity) {
@@ -36,7 +40,7 @@ class MainScene extends Scene {
 					}
 				}
 
-				for (const entity of payload.data.updated) {
+				for (const entity of tickEvent.updated) {
 					if (entity.type !== PHYS_BODY_TYPE) {
 						continue;
 					}
