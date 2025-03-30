@@ -2,10 +2,10 @@ import ServerScene from "./ServerScene";
 import PauseEvent from "./events/PauseEvent";
 import ServerTickEvent from "./events/ServerTickEvent";
 import StopEvent from "./events/StopEvent";
-import NetworkClient from "./network/NetworkClient";
+import ServerNetworkManager from "./network/ServerNetworkManager";
 
 export default class ServerEngine {
-	private _network: NetworkClient = new NetworkClient();
+	private _network: ServerNetworkManager = new ServerNetworkManager();
 	get network() {
 		return this._network;
 	}

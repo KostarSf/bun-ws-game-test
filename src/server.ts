@@ -1,7 +1,7 @@
 import { randomUUIDv7 } from "bun";
 import gamepage from "./index.html";
 import ServerEngine from "./server/ServerEngine";
-import type { WSData } from "./server/network/NetworkClient";
+import type { WSData } from "./server/network/ServerNetworkManager";
 
 const engine = new ServerEngine();
 
